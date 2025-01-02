@@ -1,6 +1,10 @@
 import React from 'react';
 import {ToastContainer} from "react-toastify";
 
+/**
+ * The Toast messages configuration component
+ * @constructor
+ */
 const ToastConfiguration = () => {
     return (
         <>

@@ -15,20 +15,30 @@ import SpinnerUI from "../../../../ui/components/SpinnerUI";
 import {Link} from "react-router-dom";
 import {ProductResponseView} from "../../../models/ProductResponseView";
 import NoProductFound from "../../../../ui/components/NoProductsFound";
+import {CartReduxService} from "../../../../../redux/cart/CartReduxService";
 
+/**
+ * Fashion Products Main Page Component
+ * @constructor
+ */
 const FashionCatalogue = () => {
     const dispatch: AppDispatch = useAppDispatch();
 
+    const [filterLoading, setFilterLoading] = useState<boolean>(false);
     const [subCategories, setSubCategories] = useState<SubCategoryView[]>([] as SubCategoryView[]);
     const [category, setCategory] = useState<CategoryView>({} as CategoryView);
     const [filteredProducts, setFilteredProducts] = useState<ProductResponseView[]>([] as ProductResponseView[]);
 
-    // get categories from redux
+    /**
+     * to get all categories from Redux
+     */
     const categoryState: categoryReducer.InitialState = useSelector((state: RootState) => {
         return state[categoryReducer.categoryFeatureKey];
     });
 
-    // get all fashion products from redux
+    /**
+     * get all products from redux state
+     */
     const productState: productReducer.InitialState = useSelector((state: RootState) => {
         return state[productReducer.productFeatureKey];
     })
@@ -36,10 +46,16 @@ const FashionCatalogue = () => {
     const {categories} = categoryState;
     const {loading, products} = productState;
 
+    /**
+     * get all categories from server
+     */
     useEffect(() => {
         dispatch(categoryActions.getAllCategoriesAction());
     }, [])
 
+    /**
+     * set subcategories when categories are changed
+     */
     useEffect(() => {
         if (categories.length > 0) {
             const categoryObj: CategoryView | undefined = categories.find(cateObj => cateObj.name === "Fashion");
@@ -55,6 +71,9 @@ const FashionCatalogue = () => {
         }
     }, [categories]);
 
+    /**
+     * get all products with the category selected
+     */
     useEffect(() => {
         if (Object.keys(category).length > 0) {
             dispatch(productActions.getAllProductsWithCategoryIdAction({
@@ -63,31 +82,47 @@ const FashionCatalogue = () => {
         }
     }, [category]);
 
+    /**
+     * set products to local state
+     */
     useEffect(() => {
         if (products) {
             setFilteredProducts(products);
         }
     }, [products]);
 
+    /**
+     * filter the products from nested component
+     * @param subsList
+     */
     const filteredTheProducts = (subsList: SubCategoryView[]) => {
         let subs = subsList.map(item => {
             if (item.isChecked) {
                 return item._id;
             }
         }).filter(item => item !== undefined);
-        setFilteredProducts(products.filter(item => subs.includes(item.subCategoryObj._id)));
+        setFilterLoading(true);
+        setTimeout(() => {
+            setFilteredProducts(products.filter(item => subs.includes(item?.subCategoryObj?._id)));
+            setFilterLoading(false);
+        }, 300);
+
     };
 
+    /**
+     * on click of add to cart
+     * @param product
+     */
     const clickAddToCart = (product: ProductResponseView) => {
         dispatch({
             type: `${cartReducer.addToCart}`,
-            payload: {product: {...product, count: 1}}
+            payload: {product: {...CartReduxService.convertCartProduct(product), count: 1}, dispatch: dispatch}
         })
     };
 
     return (
         <>
-            {loading && <SpinnerUI/>}
+            {(loading || filterLoading) && <SpinnerUI/>}
             <MainNavBar/>
             <Container fluid>
                 <Row>

@@ -9,11 +9,11 @@ export interface ProductResponseView {
     count: number;
     sold: number;
     userObj: UserObj;
-    categoryObj: CategoryObj;
-    subCategoryObj: SubCategoryObj;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
+    categoryObj?: CategoryObj;
+    subCategoryObj?: SubCategoryObj;
+    createdAt?: string;
+    updatedAt?: string;
+    __v?: number;
 }
 
 export interface UserObj {

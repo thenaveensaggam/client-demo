@@ -9,20 +9,33 @@ import {useSelector} from "react-redux";
 import SpinnerUI from "../../../ui/components/SpinnerUI";
 import {Link} from "react-router-dom";
 
+/**
+ * Manage Products main component
+ * @constructor
+ */
 const ManageProducts = () => {
     const dispatch: AppDispatch = useAppDispatch();
 
-    // get all products data from redux
+    /**
+     * get all products data from redux
+     */
     const productState: productReducer.InitialState = useSelector((state: RootState) => {
         return state[productReducer.productFeatureKey];
     });
 
     const {loading, products} = productState;
 
+    /**
+     * get all products from server when the page is loaded
+     */
     useEffect(() => {
         dispatch(productActions.getAllProductsAction());
     }, []);
 
+    /**
+     * click on delete product with product Id
+     * @param productId
+     */
     const clickDeleteProduct = (productId: string | undefined) => {
         if (productId) {
             dispatch(productActions.deleteProductAction({

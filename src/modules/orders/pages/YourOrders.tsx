@@ -1,64 +1,133 @@
 import React, {useEffect} from 'react';
 import MainNavBar from "../../layout/pages/navbar/MainNavBar";
 import LayoutHeading from "../../layout/components/layout-heading/LayoutHeading";
-import {Button, Col, Container, ListGroup, ListGroupItem, Row} from "react-bootstrap";
-import orderImg from '../../../assets/img/order-success.png';
-import {Link} from "react-router-dom";
+import {Badge, Button, Col, Container, ListGroup, ListGroupItem, Row, Table} from "react-bootstrap";
 import * as orderReducer from "../../../redux/order/order.reducer";
 import {useSelector} from "react-redux";
-import {RootState} from "../../../redux/store";
+import {AppDispatch, RootState, useAppDispatch} from "../../../redux/store";
 import SpinnerUI from "../../ui/components/SpinnerUI";
+import * as orderActions from "../../../redux/order/order.actions";
+import NoProductFound from "../../ui/components/NoProductsFound";
+import {Link} from "react-router-dom";
 
+/**
+ * The MyOrders Page Component
+ * @constructor
+ */
+const YourOrders = () => {
+    const dispatch: AppDispatch = useAppDispatch();
 
-const OrderDetails = () => {
-
-    // get order details from redux
+    /**
+     * get order state from server
+     */
     const orderState: orderReducer.InitialState = useSelector((state: RootState) => {
         return state[orderReducer.orderFeatureKey];
     });
 
-    const {loading, order} = orderState;
+    const {loading, orders} = orderState;
+
+    /**
+     * get all my orders when the page is loaded
+     */
+    useEffect(() => {
+        dispatch(orderActions.getMyOrdersAction());
+    }, [])
 
     return (
         <>
             {loading && <SpinnerUI/>}
             <MainNavBar/>
-            <LayoutHeading heading={'Order Details'} color={'text-success'}/>
+            <LayoutHeading heading={'Your Orders'} color={'text-success'}/>
             {
-                order && Object.keys(order).length > 0 &&
-                <Container>
-                    <Row>
-                        <Col xs={3}>
-                            <img src={orderImg} alt="" className="rounded-circle img-fluid"/>
-                        </Col>
-                        <Col xs={8}>
-                            <ListGroup>
-                                <ListGroupItem className="fw-bold text-success">
-                                    Order is placed Successfully
-                                </ListGroupItem>
-                                <ListGroupItem>
-                                    Order Number : <span className="fw-bold">{order._id}</span>
-                                </ListGroupItem>
-                                <ListGroupItem>
-                                    Total Amount : <span
-                                    className="fw-bold">&#8377; {Number(order.grandTotal).toFixed(2)}</span>
-                                </ListGroupItem>
-                                <ListGroupItem>
-                                    Order Status : <span className="fw-bold">{order.orderStatus}</span>
-                                </ListGroupItem>
-                                <ListGroupItem>
-                                    Payment mode : <span className="fw-bold">{order.paymentType}</span>
-                                </ListGroupItem>
-                            </ListGroup>
-
-                            <Link to={'/products/fashion'}>
-                                <Button variant={'warning'} className="mt-3">Continue Shopping</Button>
-                            </Link>
-                        </Col>
-                    </Row>
-                </Container>
+                orders && orders.length > 0 ? <>
+                    <Container>
+                        <Row>
+                            <Col>
+                                <Table striped hover className="text-center shadow-lg">
+                                    <thead className="bg-success text-white">
+                                    <tr>
+                                        <th>Order Number</th>
+                                        <th>Order Details</th>
+                                        <th>Order Placed On</th>
+                                        <th>Order By</th>
+                                        <th>Total Amount</th>
+                                        <th>Payment Type</th>
+                                        <th>Order Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {
+                                        orders.map(order => {
+                                            return (
+                                                <tr key={order._id}>
+                                                    <td>{order._id}</td>
+                                                    <td>
+                                                        <ListGroup>
+                                                            {
+                                                                order.products.map(item => {
+                                                                    return (
+                                                                        <ListGroupItem key={item._id}>
+                                                                            <Row>
+                                                                                <Col xs={2}>
+                                                                                    <img src={item?.imageUrl}
+                                                                                         alt="" width={25} height={25}/>
+                                                                                </Col>
+                                                                                <Col xs={8}>
+                                                                                    <Link
+                                                                                        className="text-decoration-none text-success"
+                                                                                        to={`/products/view/Fashion/${item._id}`}>{item.title}</Link>
+                                                                                </Col>
+                                                                            </Row>
+                                                                        </ListGroupItem>
+                                                                    )
+                                                                })
+                                                            }
+                                                        </ListGroup>
+                                                    </td>
+                                                    <td>{new Date(order.createdAt).toLocaleDateString()} {new Date(order.createdAt).toLocaleTimeString()}</td>
+                                                    <td>{order.orderBy?.username}</td>
+                                                    <td>&#8377; {Number(order.grandTotal).toFixed(2)}</td>
+                                                    <td>{order.paymentType}</td>
+                                                    <td className="fw-bold">
+                                                        {
+                                                            order.orderStatus === "Order Placed" &&
+                                                            <Badge bg={'info'}>{order.orderStatus}</Badge>
+                                                        }
+                                                        {
+                                                            order.orderStatus === "Processing" &&
+                                                            <Badge bg={'primary'}>{order.orderStatus}</Badge>
+                                                        }
+                                                        {
+                                                            order.orderStatus === "Dispatched" &&
+                                                            <Badge bg={'success'}>{order.orderStatus}</Badge>
+                                                        }
+                                                        {
+                                                            order.orderStatus === "Delivered" &&
+                                                            <Badge bg={'warning'}>{order.orderStatus}</Badge>
+                                                        }
+                                                        {
+                                                            order.orderStatus === "Cancelled" &&
+                                                            <Badge bg={'danger'}>{order.orderStatus}</Badge>
+                                                        }
+                                                        {
+                                                            order.orderStatus === "Completed" &&
+                                                            <Badge bg={'success'}>{order.orderStatus}</Badge>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })
+                                    }
+                                    </tbody>
+                                </Table>
+                            </Col>
+                        </Row>
+                    </Container>
+                </> : <>
+                    <NoProductFound/>
+                </>
             }
         </>
     );
 };
-export default OrderDetails;
+export default YourOrders;

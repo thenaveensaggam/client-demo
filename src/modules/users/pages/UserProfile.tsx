@@ -7,6 +7,7 @@ import {AppDispatch, RootState, useAppDispatch} from "../../../redux/store";
 import {Col, Container, Row, Card, Button, ListGroup, ListGroupItem} from "react-bootstrap";
 import * as userActions from "../../../redux/users/user.actions";
 import SpinnerUI from "../../ui/components/SpinnerUI";
+import {Link} from "react-router-dom";
 
 declare const window: Window &
     typeof globalThis & {
@@ -26,7 +27,7 @@ const UserProfile = () => {
         return state[userReducer.userFeatureKey];
     });
 
-    let {isAuthenticated, user, loading} = userState;
+    let {isAuthenticated, user, loading, address} = userState;
 
     useEffect(() => {
         cloudinaryRef.current = window.cloudinary;
@@ -38,7 +39,23 @@ const UserProfile = () => {
                 dispatch(userActions.updateProfilePictureAction(result.info.secure_url));
             }
         });
-    }, [])
+    }, []);
+
+    useEffect(() => {
+        dispatch(userActions.getAddressAction());
+    }, []);
+
+    const clickDeleteAddress = (addressId: string | undefined) => {
+        if (addressId) {
+            dispatch(userActions.deleteAddressAction({
+                addressId: addressId
+            })).then((response: any) => {
+                if (response.data) {
+                    dispatch(userActions.getAddressAction());
+                }
+            });
+        }
+    };
 
 
     return (
@@ -93,40 +110,52 @@ const UserProfile = () => {
                                         <div className="d-flex justify-content-between">
                                             <p className="h4 text-white">Shipping Address</p>
                                             <div>
-                                                <Button variant={'warning'} className="me-2">
-                                                    <i className="bi bi-plus-circle-fill text-white"></i>
-                                                </Button>
-                                                <Button variant={'primary'} className="me-2">
-                                                    <i className="bi bi-pencil-fill text-white"></i>
-                                                </Button>
-                                                <Button variant={'danger'} className="me-2">
-                                                    <i className="bi bi-trash-fill text-white"></i>
-                                                </Button>
+
+                                                {
+                                                    address && Object.keys(address).length > 0 ?
+                                                        <>
+                                                            <Link to={`/users/edit-shipping-address/${address._id}`}>
+                                                                <Button variant={'primary'} className="me-2">
+                                                                    <i className="bi bi-pencil-fill text-white"></i>
+                                                                </Button>
+                                                            </Link>
+                                                            <Button variant={'danger'} className="me-2"
+                                                                    onClick={() => clickDeleteAddress(address._id)}>
+                                                                <i className="bi bi-trash-fill text-white"></i>
+                                                            </Button>
+                                                        </> :
+                                                        <Link to={'/users/add-shipping-address'}>
+                                                            <Button variant={'warning'} className="me-2">
+                                                                <i className="bi bi-plus-circle-fill text-white"></i>
+                                                            </Button>
+                                                        </Link>
+                                                }
                                             </div>
                                         </div>
                                     </Card.Header>
-                                    <Card.Body>
-                                        <ListGroup>
-                                            <ListGroupItem>Name : <span
-                                                className="fw-bold"></span></ListGroupItem>
-                                            <ListGroupItem>Email : <span
-                                                className="fw-bold"></span></ListGroupItem>
-                                            <ListGroupItem>Flat : <span
-                                                className="fw-bold"></span></ListGroupItem>
-                                            <ListGroupItem>Street : <span
-                                                className="fw-bold"></span></ListGroupItem>
-                                            <ListGroupItem>Landmark : <span
-                                                className="fw-bold"></span></ListGroupItem>
-                                            <ListGroupItem>City : <span
-                                                className="fw-bold"></span></ListGroupItem>
-                                            <ListGroupItem>State : <span
-                                                className="fw-bold"></span></ListGroupItem>
-                                            <ListGroupItem>Country : <span
-                                                className="fw-bold"></span></ListGroupItem>
-                                            <ListGroupItem>PinCode : <span
-                                                className="fw-bold"></span></ListGroupItem>
-                                        </ListGroup>
-                                    </Card.Body>
+                                    {
+                                        address && Object.keys(address).length > 0 &&
+                                        <Card.Body>
+                                            <ListGroup>
+                                                <ListGroupItem>Mobile : <span
+                                                    className="fw-bold">{address.mobile}</span></ListGroupItem>
+                                                <ListGroupItem>Flat : <span
+                                                    className="fw-bold">{address.flat}</span></ListGroupItem>
+                                                <ListGroupItem>Street : <span
+                                                    className="fw-bold">{address.street}</span></ListGroupItem>
+                                                <ListGroupItem>Landmark : <span
+                                                    className="fw-bold">{address.landmark}</span></ListGroupItem>
+                                                <ListGroupItem>City : <span
+                                                    className="fw-bold">{address.city}</span></ListGroupItem>
+                                                <ListGroupItem>State : <span
+                                                    className="fw-bold">{address.state}</span></ListGroupItem>
+                                                <ListGroupItem>Country : <span
+                                                    className="fw-bold">{address.country}</span></ListGroupItem>
+                                                <ListGroupItem>PinCode : <span
+                                                    className="fw-bold">{address.pinCode}</span></ListGroupItem>
+                                            </ListGroup>
+                                        </Card.Body>
+                                    }
                                 </Card>
                             </Col>
                         </Row>

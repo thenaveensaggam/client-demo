@@ -12,13 +12,23 @@ import SpinnerUI from "../../ui/components/SpinnerUI";
 import * as userActions from "../../../redux/users/user.actions";
 import {ToastUtil} from "../../../util/ToastUtil";
 
+/**
+ * Props for the component
+ */
 interface Password {
     password: string;
     confirmPassword: string;
 }
 
+/**
+ * Change Password component
+ * @constructor
+ */
 const ChangePassword = () => {
 
+    /**
+     * get users state from redux
+     */
     const userState: userReducer.InitialState = useSelector((state: RootState) => {
         return state[userFeatureKey]
     })
@@ -34,6 +44,10 @@ const ChangePassword = () => {
         confirmPassword: ""
     });
 
+    /**
+     * to update the local state when the form data changed
+     * @param event
+     */
     const updateInput = (event: React.ChangeEvent<HTMLInputElement>) => {
         setUser({
             ...user,
@@ -41,6 +55,10 @@ const ChangePassword = () => {
         })
     };
 
+    /**
+     * handle submit function to change the password
+     * @param event
+     */
     const handleSubmit = (event: any) => {
         event.preventDefault();
         const form = event.currentTarget;

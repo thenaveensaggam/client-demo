@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import MainNavBar from "../../../layout/pages/navbar/MainNavBar";
 import LayoutHeading from "../../../layout/components/layout-heading/LayoutHeading";
 import {Button, Col, Container, Form, ListGroup, ListGroupItem, Row} from "react-bootstrap";
-import {useNavigate} from "react-router-dom";
 import {AppDispatch, RootState, useAppDispatch} from "../../../../redux/store";
 import * as categoryActions from "../../../../redux/categories/category.actions";
 import * as categoryReducer from "../../../../redux/categories/category.reducer";
@@ -10,9 +9,15 @@ import {useSelector} from "react-redux";
 import SpinnerUI from "../../../ui/components/SpinnerUI";
 import {CategoryView, SubCategoryView} from "../../models/CategoryView";
 
+/**
+ * Add Category Main Component
+ * @constructor
+ */
 const AddCategory = () => {
 
-    // get categories data from redux
+    /**
+     * get categories data from redux
+     */
     const categoryState: categoryReducer.InitialState = useSelector((state: RootState) => {
         return state[categoryReducer.categoryFeatureKey];
     });
@@ -21,7 +26,6 @@ const AddCategory = () => {
 
     const [validated, setValidated] = useState<boolean>(false);
     const dispatch: AppDispatch = useAppDispatch();
-    const navigate = useNavigate();
     const [subCategories, setSubCategories] = useState<SubCategoryView[]>([] as SubCategoryView[]);
     const [categoryId, setCategoryId] = useState<string>("");
     const [subCategory, setSubCategory] = useState<SubCategoryView>({
@@ -29,10 +33,17 @@ const AddCategory = () => {
         description: ""
     });
 
+    /**
+     * get all categories when the page is loaded
+     */
     useEffect(() => {
         dispatch(categoryActions.getAllCategoriesAction());
     }, [])
 
+    /**
+     * when a category option is selected
+     * @param event
+     */
     const selectCategory = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setCategoryId(event.target.value);
         if (categories.length > 0) {
@@ -45,6 +56,10 @@ const AddCategory = () => {
         }
     };
 
+    /**
+     * submit the form
+     * @param event
+     */
     const handleSubmit = (event: any) => {
         event.preventDefault();
         const form = event.currentTarget;

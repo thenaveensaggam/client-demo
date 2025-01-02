@@ -1,6 +1,10 @@
 import React from 'react';
 import spinnerImg from '../../../assets/img/spinner.gif';
 
+/**
+ * The loading spinner component (static)
+ * @constructor
+ */
 const SpinnerUI = () => {
     return (
         <>

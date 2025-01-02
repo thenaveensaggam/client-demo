@@ -1,13 +1,11 @@
-export interface CartProduct {
-    product: string;
-    count: number;
-    price: number;
-}
+import {ProductsEntity} from "../../cart/models/CartResponseView";
 
-export interface CartRequestView {
-    products: CartProduct[];
-    total: number,
-    tax: number,
-    grandTotal: number,
-    
+export interface OrderRequestView {
+    products: ProductsEntity[],
+    total: string;
+    tax: string;
+    grandTotal: string;
+    userObj: string;
+    paymentType: string;
+    orderStatus?: string;
 }

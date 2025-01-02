@@ -2,22 +2,40 @@ import React, {useState} from 'react';
 import {Button, Form, ListGroup, Offcanvas} from "react-bootstrap";
 import {SubCategoryView} from "../../categories/models/CategoryView";
 
+/**
+ * The Product Sidebar Component Types
+ */
 interface IProps {
     subCategories: SubCategoryView[];
     filteredTheProducts: (subsList: SubCategoryView[]) => void;
     setSubCategories: React.Dispatch<React.SetStateAction<SubCategoryView[]>>
 }
 
+/**
+ * The Product Sidebar component
+ * @param subCategories
+ * @param filteredTheProducts
+ * @param setSubCategories
+ * @constructor
+ */
 const ProductSideBar: React.FC<IProps> = ({subCategories, filteredTheProducts, setSubCategories}) => {
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
+    /**
+     * on click of apply button
+     */
     const clickApply = () => {
         setShow(false);
         filteredTheProducts(subCategories);
     };
 
+    /**
+     * to update checks from nested component
+     * @param event
+     * @param id
+     */
     const updateChecks = (event: any, id: string | undefined) => {
         if (id) {
             setSubCategories(subCategories.map(item => {

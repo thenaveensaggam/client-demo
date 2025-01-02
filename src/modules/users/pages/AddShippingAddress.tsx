@@ -3,22 +3,23 @@ import MainNavBar from "../../layout/pages/navbar/MainNavBar";
 import LayoutHeading from "../../layout/components/layout-heading/LayoutHeading";
 import {Button, Col, Container, Form, Row} from "react-bootstrap";
 import {Link, useNavigate} from "react-router-dom";
-import {UserView} from "../models/UserView";
 import * as userReducer from "../../../redux/users/user.reducer";
 import {useSelector} from "react-redux";
 import {AppDispatch, RootState, useAppDispatch} from "../../../redux/store";
-import {userFeatureKey, userLogOutAction} from "../../../redux/users/user.reducer";
+import {userFeatureKey} from "../../../redux/users/user.reducer";
 import SpinnerUI from "../../ui/components/SpinnerUI";
 import * as userActions from "../../../redux/users/user.actions";
-import {ToastUtil} from "../../../util/ToastUtil";
+import {AddressView} from "../models/AddressView";
 
-interface Password {
-    password: string;
-    confirmPassword: string;
-}
+/**
+ * Add a new Shipping address component
+ * @constructor
+ */
+const AddShippingAddress = () => {
 
-const AddNewAddress = () => {
-
+    /**
+     * get the user state from redux
+     */
     const userState: userReducer.InitialState = useSelector((state: RootState) => {
         return state[userFeatureKey]
     })
@@ -29,31 +30,42 @@ const AddNewAddress = () => {
     const dispatch: AppDispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    let [user, setUser] = useState<Password>({
-        password: "",
-        confirmPassword: ""
+    let [address, setAddress] = useState<AddressView>({
+        mobile: "",
+        flat: "",
+        landmark: "",
+        street: "",
+        city: "",
+        state: "",
+        country: "",
+        pinCode: ""
     });
 
+    /**
+     * to update input when the form field values are changed
+     * @param event
+     */
     const updateInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setUser({
-            ...user,
+        setAddress({
+            ...address,
             [event.target.name]: event.target.value
         })
     };
 
+    /**
+     * handle submit function for create new address
+     * @param event
+     */
     const handleSubmit = (event: any) => {
         event.preventDefault();
         const form = event.currentTarget;
         if (form.checkValidity() === true) {
-            if (user.password.trim() === user.confirmPassword.trim()) {
-                dispatch(userActions.changePasswordAction(user.password)).then((response: any) => {
+            if (address && Object.keys(address).length > 0) {
+                dispatch(userActions.createNewAddressAction(address)).then((response: any) => {
                     if (!response.error) {
-                        navigate("/");
-                        dispatch(userLogOutAction()); // auto-logOff once the password is changed
+                        navigate("/users/profile");
                     }
                 });
-            } else {
-                ToastUtil.displayErrorToast("Both the passwords are not matched");
             }
         }
         if (form.checkValidity() === false) {
@@ -67,7 +79,7 @@ const AddNewAddress = () => {
         <>
             {loading && <SpinnerUI/>}
             <MainNavBar/>
-            <LayoutHeading heading={'Add Shipping Address'} color={'text-success'} icon={'bi-eye-slash-fill'}/>
+            <LayoutHeading heading={'Add Shipping Address'} color={'text-success'}/>
             <Container>
                 <Row>
                     <Col xs={4}>
@@ -75,34 +87,72 @@ const AddNewAddress = () => {
                             <Form.Group className="mb-2">
                                 <Form.Control
                                     required
-                                    pattern={"(?!.*\\s)(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[~`!@#$%^&*()--+={}\\[\\]|\\\\:;\"'<>,.?/_₹]).{6,15}"}
-                                    value={user.password}
+                                    value={address.mobile}
                                     onChange={updateInput}
-                                    name={'password'}
-                                    type={'password'} placeholder={'New Password'}></Form.Control>
-                                <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
-                                <Form.Control.Feedback type="invalid">
-                                    Please choose a valid Password.
-                                </Form.Control.Feedback>
+                                    name={'mobile'}
+                                    type={'text'} placeholder={'Mobile'}></Form.Control>
                             </Form.Group>
                             <Form.Group className="mb-2">
                                 <Form.Control
                                     required
-                                    pattern={"(?!.*\\s)(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[~`!@#$%^&*()--+={}\\[\\]|\\\\:;\"'<>,.?/_₹]).{6,15}"}
-                                    value={user.confirmPassword}
+                                    value={address.flat}
                                     onChange={updateInput}
-                                    name={'confirmPassword'}
-                                    type={'password'} placeholder={'Confirm Password'}></Form.Control>
-                                <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
-                                <Form.Control.Feedback type="invalid">
-                                    Please choose a valid Password.
-                                </Form.Control.Feedback>
+                                    name={'flat'}
+                                    type={'text'} placeholder={'Flat'}></Form.Control>
+                            </Form.Group>
+                            <Form.Group className="mb-2">
+                                <Form.Control
+                                    required
+                                    value={address.landmark}
+                                    onChange={updateInput}
+                                    name={'landmark'}
+                                    type={'text'} placeholder={'Landmark'}></Form.Control>
+                            </Form.Group>
+                            <Form.Group className="mb-2">
+                                <Form.Control
+                                    required
+                                    value={address.street}
+                                    onChange={updateInput}
+                                    name={'street'}
+                                    type={'text'} placeholder={'Street'}></Form.Control>
+                            </Form.Group>
+                            <Form.Group className="mb-2">
+                                <Form.Control
+                                    required
+                                    value={address.city}
+                                    onChange={updateInput}
+                                    name={'city'}
+                                    type={'text'} placeholder={'City'}></Form.Control>
+                            </Form.Group>
+                            <Form.Group className="mb-2">
+                                <Form.Control
+                                    required
+                                    value={address.state}
+                                    onChange={updateInput}
+                                    name={'state'}
+                                    type={'text'} placeholder={'State'}></Form.Control>
+                            </Form.Group>
+                            <Form.Group className="mb-2">
+                                <Form.Control
+                                    required
+                                    value={address.country}
+                                    onChange={updateInput}
+                                    name={'country'}
+                                    type={'text'} placeholder={'Country'}></Form.Control>
+                            </Form.Group>
+                            <Form.Group className="mb-2">
+                                <Form.Control
+                                    required
+                                    value={address.pinCode}
+                                    onChange={updateInput}
+                                    name={'pinCode'}
+                                    type={'text'} placeholder={'PinCode'}></Form.Control>
                             </Form.Group>
                             <Form.Group className="mb-2">
                                 <Button variant="success" type="submit">
-                                    Update
+                                    Add
                                 </Button>
-                                <Link to={'/'} className="btn btn-dark ms-2">Cancel</Link>
+                                <Link to={'/users/profile'} className="btn btn-dark ms-2">Cancel</Link>
                             </Form.Group>
                         </Form>
                     </Col>
@@ -111,4 +161,4 @@ const AddNewAddress = () => {
         </>
     );
 };
-export default AddNewAddress;
+export default AddShippingAddress;

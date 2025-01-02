@@ -1,12 +1,22 @@
 import React from 'react';
 import {Col, Container, Row} from "react-bootstrap";
 
+/**
+ * The Main props for the component
+ */
 interface IProps {
     heading: string;
     color: string;
     icon?: string;
 }
 
+/**
+ * The Layout Heading component
+ * @param heading
+ * @param color
+ * @param icon
+ * @constructor
+ */
 const LayoutHeading: React.FC<IProps> = ({heading, color, icon}) => {
     return (
         <>

@@ -1,24 +1,54 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import MainNavBar from "../../layout/pages/navbar/MainNavBar";
 import LayoutHeading from "../../layout/components/layout-heading/LayoutHeading";
 import {Button, Card, Col, Container, ListGroup, ListGroupItem, Row, Table} from "react-bootstrap";
-import {Link} from "react-router-dom";
 import * as cartReducer from "../../../redux/cart/cart.reducer";
+import * as userReducer from "../../../redux/users/user.reducer";
+import * as cartActions from "../../../redux/cart/cart.actions";
 import {useSelector} from "react-redux";
 import {AppDispatch, RootState, useAppDispatch} from "../../../redux/store";
 import NoProductFound from "../../ui/components/NoProductsFound";
+import {CartRequestView} from "../models/CartRequestView";
+import {useNavigate} from "react-router-dom";
+import SpinnerUI from "../../ui/components/SpinnerUI";
+import {CartResponseView, ProductsEntity} from "../models/CartResponseView";
+import {CartReduxService} from "../../../redux/cart/CartReduxService";
 
+/**
+ * The Cart Page Main Component
+ * @constructor
+ */
 const CartPage = () => {
     const dispatch: AppDispatch = useAppDispatch();
+    const navigate = useNavigate();
     const PRODUCT_TAX: number = 5.0;
 
-    // get cart count from redux
+    /**
+     * cart state data
+     */
+    const [cart, setCart] = useState<CartResponseView>({} as CartResponseView);
+
+    /**
+     * get cart count from redux
+     */
     const cartState: cartReducer.InitialState = useSelector((state: RootState) => {
         return state[cartReducer.cartFeatureKey];
     })
 
-    const {products} = cartState;
+    /**
+     * get user state from redux
+     */
+    const userState: userReducer.InitialState = useSelector((state: RootState) => {
+        return state[userReducer.userFeatureKey];
+    })
 
+    const {loading, cart: cartRedux} = cartState;
+    const {user} = userState
+
+    /**
+     * click on decr Count
+     * @param productId
+     */
     const clickDecrCount = (productId: string) => {
         dispatch({
             type: `${cartReducer.decrementCartProductCount}`,
@@ -26,6 +56,10 @@ const CartPage = () => {
         })
     };
 
+    /**
+     * click on incr count
+     * @param productId
+     */
     const clickIncrCount = (productId: string) => {
         dispatch({
             type: `${cartReducer.incrementCartProductCount}`,
@@ -33,6 +67,10 @@ const CartPage = () => {
         })
     };
 
+    /**
+     * click on delete product from cart
+     * @param productId
+     */
     const clickDeleteProduct = (productId: string) => {
         dispatch({
             type: `${cartReducer.deleteProductFromCart}`,
@@ -40,28 +78,43 @@ const CartPage = () => {
         })
     };
 
-    const calculateTotal = (): number => {
-        let total: number = 0;
-        for (let product of products) {
-            total += (Number(product.price) * Number(product.count));
+    /**
+     * click on checkout button, to save data to server
+     */
+    const clickCheckOut = () => {
+        const cartProds: ProductsEntity[] = cart.products;
+        if (user && user._id) {
+            const theCart: CartRequestView = {
+                products: cartProds,
+                tax: CartReduxService.calculateTax(cartProds).toString(),
+                total: CartReduxService.calculateTotal(cartProds).toString(),
+                grandTotal: CartReduxService.calculateGrandTotal(cartProds).toString(),
+                userObj: user._id
+            }
+            dispatch(cartActions.createCartAction(theCart)).then((response: any) => {
+                if (!response.error) {
+                    navigate("/cart/checkout");
+                }
+            });
         }
-        return total;
     };
 
-    const calculateTax = (): number => {
-        return calculateTotal() * PRODUCT_TAX / 100;
-    };
-
-    const calculateGrandTotal = (): number => {
-        return calculateTotal() + calculateTax();
-    };
+    /**
+     * when the cart data changed from server
+     */
+    useEffect(() => {
+        if (cartRedux && Object.keys(cartRedux).length > 0) {
+            setCart(cartRedux);
+        }
+    }, [cartRedux])
 
     return (
         <>
+            {loading && <SpinnerUI/>}
             <MainNavBar/>
             <LayoutHeading heading={'Cart Page'} color={'text-success'}/>
             {
-                products && products.length > 0 &&
+                cart && cart.products && cart.products.length > 0 &&
                 <Container className="mt-3">
                     <Row>
                         <Col xs={9}>
@@ -84,7 +137,7 @@ const CartPage = () => {
                                         </thead>
                                         <tbody>
                                         {
-                                            products.map((product, index) => {
+                                            cart.products.map((product, index) => {
                                                 return (
                                                     <tr key={index}>
                                                         <td>{index + 1}</td>
@@ -124,19 +177,17 @@ const CartPage = () => {
                                 <Card.Body className="bg-light-success">
                                     <ListGroup>
                                         <ListGroupItem>Total : <span
-                                            className="fw-bold">&#8377;{calculateTotal().toFixed(2)}</span></ListGroupItem>
+                                            className="fw-bold">&#8377;{CartReduxService.calculateTotal(cart.products).toFixed(2)}</span></ListGroupItem>
                                         <ListGroupItem>Tax : <span
-                                            className="fw-bold">&#8377; {calculateTax().toFixed(2)}</span></ListGroupItem>
+                                            className="fw-bold">&#8377; {CartReduxService.calculateTax(cart.products).toFixed(2)}</span></ListGroupItem>
                                         <ListGroupItem>Grand Total : <span
-                                            className="fw-bold">&#8377; {calculateGrandTotal().toFixed(2)}</span></ListGroupItem>
+                                            className="fw-bold">&#8377; {CartReduxService.calculateGrandTotal(cart.products).toFixed(2)}</span></ListGroupItem>
                                     </ListGroup>
-                                    <Link to={'/cart/checkout'} className="text-decoration-none">
-                                        <div className="d-grid mt-2">
-                                            <Button variant="warning" size="sm">
-                                                CheckOut
-                                            </Button>
-                                        </div>
-                                    </Link>
+                                    <div className="d-grid mt-2">
+                                        <Button variant="warning" size="sm" onClick={clickCheckOut}>
+                                            CheckOut
+                                        </Button>
+                                    </div>
                                 </Card.Body>
                             </Card>
 
@@ -145,7 +196,7 @@ const CartPage = () => {
                 </Container>
             }
             {
-                products.length === 0 &&
+                cart?.products?.length === 0 &&
                 <NoProductFound/>
             }
         </>

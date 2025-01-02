@@ -7,28 +7,44 @@ import {userLogOutAction} from "../../../../redux/users/user.reducer";
 import {useSelector} from "react-redux";
 import {AppDispatch, RootState, useAppDispatch} from "../../../../redux/store";
 
+/**
+ * The MainNavBar Component
+ * @constructor
+ */
 const MainNavBar = () => {
     const dispatch: AppDispatch = useAppDispatch();
     const navigate = useNavigate();
 
+    /**
+     * get users state from redux
+     */
     const userState: userReducer.InitialState = useSelector((state: RootState) => {
         return state[userReducer.userFeatureKey];
     });
 
-    // get cart count from redux
+    /**
+     * get cart state from redux
+     */
     const cartState: cartReducer.InitialState = useSelector((state: RootState) => {
         return state[cartReducer.cartFeatureKey];
     })
 
-    const {products} = cartState;
+    const {cart} = cartState;
 
     let {isAuthenticated, user} = userState;
 
+    /**
+     * onclick of logOut Link
+     */
     const clickLogOut = () => {
         navigate("/");
         dispatch(userLogOutAction());
     };
 
+    /**
+     * to navigate to respective pages
+     * @param path
+     */
     const navigateTo = (path: string) => {
         navigate(path);
     };
@@ -54,21 +70,38 @@ const MainNavBar = () => {
                                 <Nav className="">
                                     <Link to={'/products/household'} className="nav-link">Household</Link>
                                 </Nav>
-                                <Nav>
-                                    <NavDropdown title={"Admin"} id="basic-nav-dropdown"
-                                                 className="text-white">
-                                        <NavDropdown.Item
-                                            onClick={() => navigateTo("/categories/add")}>Add
-                                            Categories</NavDropdown.Item>
-                                        <NavDropdown.Item
-                                            onClick={() => navigateTo("/products/upload")}>Upload
-                                            Products</NavDropdown.Item>
-                                        <NavDropdown.Divider/>
-                                        <NavDropdown.Item
-                                            onClick={() => navigateTo("/products/manage")}>Manage
-                                            Products</NavDropdown.Item>
-                                    </NavDropdown>
-                                </Nav>
+                                {
+                                    user && user.isAdmin &&
+                                    <Nav>
+                                        <NavDropdown title={"Admin"} id="basic-nav-dropdown"
+                                                     className="text-white">
+                                            {
+                                                user && user.isSuperAdmin &&
+                                                <NavDropdown.Item
+                                                    onClick={() => navigateTo("/categories/add")}>Add
+                                                    Categories</NavDropdown.Item>
+                                            }
+                                            {
+                                                user && user.isAdmin &&
+                                                <NavDropdown.Item
+                                                    onClick={() => navigateTo("/products/upload")}>Upload
+                                                    Products</NavDropdown.Item>
+                                            }
+                                            {
+                                                user && user.isAdmin && user.isSuperAdmin &&
+                                                <>
+                                                    <NavDropdown.Divider/>
+                                                    <NavDropdown.Item
+                                                        onClick={() => navigateTo("/products/manage")}>Manage
+                                                        Products</NavDropdown.Item>
+                                                    <NavDropdown.Item
+                                                        onClick={() => navigateTo("/orders/manage")}>Manage
+                                                        Orders</NavDropdown.Item>
+                                                </>
+                                            }
+                                        </NavDropdown>
+                                    </Nav>
+                                }
                             </>
                         }
 
@@ -81,7 +114,8 @@ const MainNavBar = () => {
                                             <Link to={'/cart/list'} className="nav-link">
                                                 <div className="cart-wrapper">
                                                     <i className="bi bi-cart-fill"></i>
-                                                    <span className="cart-count">{products && products.length}</span>
+                                                    <span
+                                                        className="cart-count">{cart?.products && cart?.products?.length}</span>
                                                 </div>
                                             </Link>
                                         </Nav>
@@ -95,6 +129,9 @@ const MainNavBar = () => {
                                                 <NavDropdown.Item
                                                     onClick={() => navigateTo("/users/change-password")}>Change
                                                     Password</NavDropdown.Item>
+                                                <NavDropdown.Item
+                                                    onClick={() => navigateTo("/orders/me")}>My
+                                                    Orders</NavDropdown.Item>
                                                 <NavDropdown.Divider/>
                                                 <NavDropdown.Item onClick={clickLogOut}>
                                                     <i className="bi bi-power"></i> LogOut

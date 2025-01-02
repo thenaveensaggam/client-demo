@@ -4,7 +4,15 @@ import {useSelector} from "react-redux";
 import {RootState} from "../../../../redux/store";
 import * as userReducer from "../../../../redux/users/user.reducer";
 
+/**
+ * The Home Page
+ * @constructor
+ */
 const HomePage = () => {
+
+    /**
+     * to get users state from server through redux
+     */
     const userState: userReducer.InitialState = useSelector((state: RootState) => {
         return state[userReducer.userFeatureKey];
     });

@@ -20,6 +20,16 @@ import HouseholdCatalogue from "./modules/products/pages/catalogues/household-ca
 import ViewProduct from "./modules/products/pages/view-product/ViewProduct";
 import CartPage from "./modules/cart/pages/CartPage";
 import CheckOutPage from "./modules/cart/pages/CheckOutPage";
+import AddShippingAddress from "./modules/users/pages/AddShippingAddress";
+import EditShippingAddress from "./modules/users/pages/EditShippingAddress";
+import OrderDetails from "./modules/orders/pages/OrderDetils";
+import YourOrders from "./modules/orders/pages/YourOrders";
+import ManageOrders from "./modules/orders/pages/ManageOrders";
+import PrivateRoute from "./router/PrivateRoute";
+import AdminRoute from "./router/AdminRoute";
+import SuperAdminRoute from "./router/SuperAdminRoute";
+import * as cartActions from "./redux/cart/cart.actions";
+import SpinnerUI from "./modules/ui/components/SpinnerUI";
 
 const App: React.FC = () => {
     const dispatch: AppDispatch = useAppDispatch();
@@ -27,6 +37,7 @@ const App: React.FC = () => {
     useEffect(() => {
         if (AuthUtil.setTokenToRequestHeader()) {
             dispatch(userActions.getUserInformationAction());
+            dispatch(cartActions.getCartInfoAction());
         }
     }, [])
 
@@ -36,20 +47,93 @@ const App: React.FC = () => {
             <BrowserRouter>
                 <Routes>
                     <Route path={'/'} element={<HomePage/>}/>
-                    <Route path={'/products/fashion'} element={<FashionCatalogue/>}/>
-                    <Route path={'/products/electronics'} element={<ElectronicsCatalogue/>}/>
-                    <Route path={'/products/household'} element={<HouseholdCatalogue/>}/>
-                    <Route path={'/products/upload'} element={<UploadProduct/>}/>
-                    <Route path={'/products/edit/:productId'} element={<EditProduct/>}/>
-                    <Route path={'/products/view/:categoryName/:productId'} element={<ViewProduct/>}/>
-                    <Route path={'/products/manage'} element={<ManageProducts/>}/>
+                    <Route path={'/products/fashion'} element={
+                        <PrivateRoute>
+                            <FashionCatalogue/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/products/electronics'} element={
+                        <PrivateRoute>
+                            <ElectronicsCatalogue/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/products/household'} element={
+                        <PrivateRoute>
+                            <HouseholdCatalogue/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/products/upload'} element={
+                        <AdminRoute>
+                            <UploadProduct/>
+                        </AdminRoute>
+                    }/>
+                    <Route path={'/products/edit/:productId'} element={
+                        <AdminRoute>
+                            <EditProduct/>
+                        </AdminRoute>
+                    }/>
+                    <Route path={'/products/view/:categoryName/:productId'} element={
+                        <PrivateRoute>
+                            <ViewProduct/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/products/manage'} element={
+                        <SuperAdminRoute>
+                            <ManageProducts/>
+                        </SuperAdminRoute>
+                    }/>
                     <Route path={'/users/login'} element={<UserLogin/>}/>
                     <Route path={'/users/register'} element={<UserRegister/>}/>
-                    <Route path={'/users/profile'} element={<UserProfile/>}/>
-                    <Route path={'/users/change-password'} element={<ChangePassword/>}/>
-                    <Route path={'/categories/add'} element={<AddCategory/>}/>
-                    <Route path={'/cart/list'} element={<CartPage/>}/>
-                    <Route path={'/cart/checkout'} element={<CheckOutPage/>}/>
+                    <Route path={'/users/profile'} element={
+                        <PrivateRoute>
+                            <UserProfile/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/users/change-password'} element={
+                        <PrivateRoute>
+                            <ChangePassword/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/users/add-shipping-address'} element={
+                        <PrivateRoute>
+                            <AddShippingAddress/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/users/edit-shipping-address/:addressId'} element={
+                        <PrivateRoute>
+                            <EditShippingAddress/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/categories/add'} element={
+                        <SuperAdminRoute>
+                            <AddCategory/>
+                        </SuperAdminRoute>
+                    }/>
+                    <Route path={'/cart/list'} element={
+                        <PrivateRoute>
+                            <CartPage/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/cart/checkout'} element={
+                        <PrivateRoute>
+                            <CheckOutPage/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/orders/details'} element={
+                        <PrivateRoute>
+                            <OrderDetails/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/orders/me'} element={
+                        <PrivateRoute>
+                            <YourOrders/>
+                        </PrivateRoute>
+                    }/>
+                    <Route path={'/orders/manage'} element={
+                        <SuperAdminRoute>
+                            <ManageOrders/>
+                        </SuperAdminRoute>
+                    }/>
                 </Routes>
             </BrowserRouter>
 

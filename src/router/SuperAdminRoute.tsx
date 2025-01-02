@@ -7,7 +7,7 @@ import {RootState} from "../redux/store";
 import {Col, Container, Row} from "react-bootstrap";
 import SpinnerUI from "../modules/ui/components/SpinnerUI";
 
-function AdminRoute({children}: any) {
+function SuperAdminRoute({children}: any) {
 
     const userState: userReducer.InitialState = useSelector((state: RootState) => {
         return state[userReducer.userFeatureKey];
@@ -16,7 +16,7 @@ function AdminRoute({children}: any) {
     let {user, loading} = userState;
 
     const auth = TokenUtil.isLoggedIn();
-    return auth && user.isAdmin ? children : <>
+    return auth && user.isAdmin && user.isSuperAdmin ? children : <>
         {loading && <SpinnerUI/>}
         <Container>
             <Row>
@@ -28,4 +28,4 @@ function AdminRoute({children}: any) {
     </>;
 }
 
-export default AdminRoute;
+export default SuperAdminRoute;

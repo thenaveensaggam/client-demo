@@ -16,6 +16,10 @@ import ProductSideBar from "../../../component/ProductSideBar";
 import NoProductFound from "../../../../ui/components/NoProductsFound";
 import * as cartReducer from "../../../../../redux/cart/cart.reducer";
 
+/**
+ * Household products main page component
+ * @constructor
+ */
 const HouseholdCatalogue = () => {
     const dispatch: AppDispatch = useAppDispatch();
 
@@ -23,12 +27,16 @@ const HouseholdCatalogue = () => {
     const [category, setCategory] = useState<CategoryView>({} as CategoryView);
     const [filteredProducts, setFilteredProducts] = useState<ProductResponseView[]>([] as ProductResponseView[]);
 
-    // get categories from redux
+    /**
+     * get all categories from redux
+     */
     const categoryState: categoryReducer.InitialState = useSelector((state: RootState) => {
         return state[categoryReducer.categoryFeatureKey];
     });
 
-    // get all fashion products from redux
+    /**
+     * get all products from redux
+     */
     const productState: productReducer.InitialState = useSelector((state: RootState) => {
         return state[productReducer.productFeatureKey];
     })
@@ -36,10 +44,16 @@ const HouseholdCatalogue = () => {
     const {categories} = categoryState;
     const {loading, products} = productState;
 
+    /**
+     * get all categories from server
+     */
     useEffect(() => {
         dispatch(categoryActions.getAllCategoriesAction());
     }, [])
 
+    /**
+     * set subcategories when the categories are changed
+     */
     useEffect(() => {
         if (categories.length > 0) {
             const categoryObj: CategoryView | undefined = categories.find(cateObj => cateObj.name === "Household");
@@ -55,6 +69,9 @@ const HouseholdCatalogue = () => {
         }
     }, [categories]);
 
+    /**
+     * get all products when then category is selected
+     */
     useEffect(() => {
         if (Object.keys(category).length > 0) {
             dispatch(productActions.getAllProductsWithCategoryIdAction({
@@ -63,21 +80,32 @@ const HouseholdCatalogue = () => {
         }
     }, [category]);
 
+    /**
+     * set local products state with redux state
+     */
     useEffect(() => {
         if (products) {
             setFilteredProducts(products);
         }
     }, [products]);
 
+    /**
+     * filter the products from nested component
+     * @param subsList
+     */
     const filteredTheProducts = (subsList: SubCategoryView[]) => {
         let subs = subsList.map(item => {
             if (item.isChecked) {
                 return item._id;
             }
         }).filter(item => item !== undefined);
-        setFilteredProducts(products.filter(item => subs.includes(item.subCategoryObj._id)));
+        setFilteredProducts(products.filter(item => subs.includes(item?.subCategoryObj?._id)));
     };
 
+    /**
+     * click on add to cart button
+     * @param product
+     */
     const clickAddToCart = (product: ProductResponseView) => {
         dispatch({
             type: `${cartReducer.addToCart}`,

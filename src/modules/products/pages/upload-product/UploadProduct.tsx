@@ -12,14 +12,15 @@ import {ProductRequestView} from "../../models/ProductRequestView";
 import {UploadImageWidget} from "../../../../util/UploadImageWidget";
 import * as productActions from "../../../../redux/products/product.actions";
 
+/**
+ * Upload products main page component
+ */
 const UploadProduct = () => {
     const dispatch: AppDispatch = useAppDispatch();
     const cloudinaryRef = useRef<any>();
     const widgetRef = useRef<any>();
     const [validated, setValidated] = useState<boolean>(false);
     const [subCategories, setSubCategories] = useState<SubCategoryView[]>([] as SubCategoryView[]);
-    const [categoryId, setCategoryId] = useState<string>("");
-    const [subCategoryId, setSubCategoryId] = useState<string>("");
     const [product, setProduct] = useState<ProductRequestView>({
         title: "",
         description: "",
@@ -31,13 +32,19 @@ const UploadProduct = () => {
         subCategoryId: ""
     } as ProductRequestView);
 
-    // get categories data from redux
+    /**
+     * get categories data from redux
+     */
     const categoryState: categoryReducer.InitialState = useSelector((state: RootState) => {
         return state[categoryReducer.categoryFeatureKey];
     });
 
     let {loading, categories} = categoryState;
 
+    /**
+     * Update subcategories when the category is selected
+     * @param event
+     */
     const selectCategory = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setProduct({...product, categoryId: event.target.value})
         if (categories.length > 0) {
@@ -50,10 +57,18 @@ const UploadProduct = () => {
         }
     };
 
+    /**
+     * when subcategory is selected
+     * @param event
+     */
     const selectSubCategory = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setProduct({...product, subCategoryId: event.target.value})
     };
 
+    /**
+     * update the local state when form fields data changed
+     * @param event
+     */
     const updateProductInput = (event: React.ChangeEvent<HTMLInputElement | any>) => {
         setProduct({
             ...product,
@@ -61,6 +76,10 @@ const UploadProduct = () => {
         })
     };
 
+    /**
+     * get all categories from server when the page is loaded
+     * upload product to cloudinary
+     */
     useEffect(() => {
         dispatch(categoryActions.getAllCategoriesAction());
         // upload Image
@@ -73,6 +92,10 @@ const UploadProduct = () => {
         });
     }, [])
 
+    /**
+     * handle submit function
+     * @param event
+     */
     const handleSubmit = (event: any) => {
         event.preventDefault();
         const form = event.currentTarget;

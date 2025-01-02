@@ -16,6 +16,10 @@ import {ProductResponseView} from "../../../models/ProductResponseView";
 import NoProductFound from "../../../../ui/components/NoProductsFound";
 import * as cartReducer from "../../../../../redux/cart/cart.reducer";
 
+/**
+ * Electronics Catalogue Main Component
+ * @constructor
+ */
 const ElectronicsCatalogue = () => {
     const dispatch: AppDispatch = useAppDispatch();
 
@@ -23,12 +27,16 @@ const ElectronicsCatalogue = () => {
     const [category, setCategory] = useState<CategoryView>({} as CategoryView);
     const [filteredProducts, setFilteredProducts] = useState<ProductResponseView[]>([] as ProductResponseView[]);
 
-    // get categories from redux
+    /**
+     * get categories state from redux
+     */
     const categoryState: categoryReducer.InitialState = useSelector((state: RootState) => {
         return state[categoryReducer.categoryFeatureKey];
     });
 
-    // get all fashion products from redux
+    /**
+     * get products from redux
+     */
     const productState: productReducer.InitialState = useSelector((state: RootState) => {
         return state[productReducer.productFeatureKey];
     })
@@ -36,10 +44,16 @@ const ElectronicsCatalogue = () => {
     const {categories} = categoryState;
     const {loading, products} = productState;
 
+    /**
+     * get all categories from server when page is loaded
+     */
     useEffect(() => {
         dispatch(categoryActions.getAllCategoriesAction());
     }, [])
 
+    /**
+     * Set Subcategories when category changed
+     */
     useEffect(() => {
         if (categories.length > 0) {
             const categoryObj: CategoryView | undefined = categories.find(cateObj => cateObj.name === "Electronics");
@@ -55,6 +69,9 @@ const ElectronicsCatalogue = () => {
         }
     }, [categories]);
 
+    /**
+     * Get all products with the category Id
+     */
     useEffect(() => {
         if (Object.keys(category).length > 0) {
             dispatch(productActions.getAllProductsWithCategoryIdAction({
@@ -63,21 +80,32 @@ const ElectronicsCatalogue = () => {
         }
     }, [category]);
 
+    /**
+     * Filter all the products
+     */
     useEffect(() => {
         if (products) {
             setFilteredProducts(products);
         }
     }, [products]);
 
+    /**
+     * Filter the products from nested component selection
+     * @param subsList
+     */
     const filteredTheProducts = (subsList: SubCategoryView[]) => {
         let subs = subsList.map(item => {
             if (item.isChecked) {
                 return item._id;
             }
         }).filter(item => item !== undefined);
-        setFilteredProducts(products.filter(item => subs.includes(item.subCategoryObj._id)));
+        setFilteredProducts(products.filter(item => subs.includes(item?.subCategoryObj?._id)));
     };
 
+    /**
+     * Click on add to cart
+     * @param product
+     */
     const clickAddToCart = (product: ProductResponseView) => {
         dispatch({
             type: `${cartReducer.addToCart}`,

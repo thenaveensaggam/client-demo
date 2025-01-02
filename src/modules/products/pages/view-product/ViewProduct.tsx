@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import MainNavBar from "../../../layout/pages/navbar/MainNavBar";
 import LayoutHeading from "../../../layout/components/layout-heading/LayoutHeading";
 import {Link, useParams} from "react-router-dom";
@@ -11,23 +11,36 @@ import {Col, Container, ListGroup, ListGroupItem, Row, Card, Button} from "react
 import {ProductResponseView} from "../../models/ProductResponseView";
 import * as cartReducer from "../../../../redux/cart/cart.reducer";
 
+/**
+ * View a single product component
+ * @constructor
+ */
 const ViewProduct = () => {
     const {categoryName, productId} = useParams();
     const dispatch: AppDispatch = useAppDispatch();
 
-    //get product details from redux state
+    /**
+     * get product details from redux state
+     */
     const productState: productReducer.InitialState = useSelector((state: RootState) => {
         return state[productReducer.productFeatureKey];
     });
 
     const {loading, product} = productState;
 
+    /**
+     * get a product with the product id
+     */
     useEffect(() => {
         if (productId) {
             dispatch(productActions.getProductAction({productId: productId}));
         }
     }, [productId]);
 
+    /**
+     * click on add to cart button
+     * @param product
+     */
     const clickAddToCart = (product: ProductResponseView) => {
         dispatch({
             type: `${cartReducer.addToCart}`,

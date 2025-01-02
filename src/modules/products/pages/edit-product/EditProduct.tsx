@@ -14,6 +14,10 @@ import * as productActions from "../../../../redux/products/product.actions";
 import * as productReducer from "../../../../redux/products/product.reducers";
 import SpinnerUI from "../../../ui/components/SpinnerUI";
 
+/**
+ * EditProducts Page component
+ * @constructor
+ */
 const EditProduct = () => {
     const {productId} = useParams();
     const navigate = useNavigate();
@@ -22,8 +26,6 @@ const EditProduct = () => {
     const widgetRef = useRef<any>();
     const [validated, setValidated] = useState<boolean>(false);
     const [subCategories, setSubCategories] = useState<SubCategoryView[]>([] as SubCategoryView[]);
-    const [categoryId, setCategoryId] = useState<string>("");
-    const [subCategoryId, setSubCategoryId] = useState<string>("");
     const [product, setProduct] = useState<ProductRequestView>({
         title: "",
         description: "",
@@ -35,12 +37,16 @@ const EditProduct = () => {
         subCategoryId: ""
     } as ProductRequestView);
 
-    // get categories data from redux
+    /**
+     * get categories data from redux
+     */
     const categoryState: categoryReducer.InitialState = useSelector((state: RootState) => {
         return state[categoryReducer.categoryFeatureKey];
     });
 
-    // get the product information from redux
+    /**
+     * get the product information from redux
+     */
     const productState: productReducer.InitialState = useSelector((state: RootState) => {
         return state[productReducer.productFeatureKey];
     })
@@ -49,6 +55,10 @@ const EditProduct = () => {
 
     let {categories} = categoryState;
 
+    /**
+     * set subCategories when category is selected
+     * @param event
+     */
     const selectCategory = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setProduct({...product, categoryId: event.target.value})
         if (categories.length > 0) {
@@ -61,10 +71,18 @@ const EditProduct = () => {
         }
     };
 
+    /**
+     * when subCategory is selected
+     * @param event
+     */
     const selectSubCategory = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setProduct({...product, subCategoryId: event.target.value})
     };
 
+    /**
+     * to update the input, to set the local state
+     * @param event
+     */
     const updateProductInput = (event: React.ChangeEvent<HTMLInputElement | any>) => {
         setProduct({
             ...product,
@@ -72,6 +90,9 @@ const EditProduct = () => {
         })
     };
 
+    /**
+     * get all categories from server when the page is loaded
+     */
     useEffect(() => {
         dispatch(categoryActions.getAllCategoriesAction());
         // upload Image
@@ -84,12 +105,18 @@ const EditProduct = () => {
         });
     }, [])
 
+    /**
+     * get a product with the product Id
+     */
     useEffect(() => {
         if (productId) {
             dispatch(productActions.getProductAction({productId: productId}));
         }
     }, [productId]);
 
+    /**
+     * to update the local state with redux product
+     */
     useEffect(() => {
         if (reduxProduct) {
             setProduct({
@@ -106,6 +133,10 @@ const EditProduct = () => {
         }
     }, [reduxProduct])
 
+    /**
+     * handle submit function
+     * @param event
+     */
     const handleSubmit = (event: any) => {
         event.preventDefault();
         const form = event.currentTarget;

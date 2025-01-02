@@ -2,6 +2,10 @@ import React from 'react';
 import prodImg from '../../../assets/img/noimg.png';
 import {Col, Container, Row} from "react-bootstrap";
 
+/**
+ * The No-Products found component (static)
+ * @constructor
+ */
 const NoProductFound = () => {
     return (
         <>

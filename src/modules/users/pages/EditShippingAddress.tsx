@@ -1,30 +1,31 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import MainNavBar from "../../layout/pages/navbar/MainNavBar";
 import LayoutHeading from "../../layout/components/layout-heading/LayoutHeading";
 import {Button, Col, Container, Form, Row} from "react-bootstrap";
-import {Link, useNavigate} from "react-router-dom";
-import {UserView} from "../models/UserView";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import * as userReducer from "../../../redux/users/user.reducer";
 import {useSelector} from "react-redux";
 import {AppDispatch, RootState, useAppDispatch} from "../../../redux/store";
-import {userFeatureKey, userLogOutAction} from "../../../redux/users/user.reducer";
+import {userFeatureKey} from "../../../redux/users/user.reducer";
 import SpinnerUI from "../../ui/components/SpinnerUI";
 import * as userActions from "../../../redux/users/user.actions";
-import {ToastUtil} from "../../../util/ToastUtil";
 import {AddressView} from "../models/AddressView";
 
-interface Password {
-    password: string;
-    confirmPassword: string;
-}
+/**
+ * Edit Shipping address details component
+ * @constructor
+ */
+const EditShippingAddress = () => {
+    const {addressId} = useParams();
 
-const AddShippingAddress = () => {
-
+    /**
+     * get users state from redux
+     */
     const userState: userReducer.InitialState = useSelector((state: RootState) => {
         return state[userFeatureKey]
     })
 
-    let {loading} = userState;
+    let {loading, address: reduxAddress} = userState;
 
     const [validated, setValidated] = useState<boolean>(false);
     const dispatch: AppDispatch = useAppDispatch();
@@ -41,6 +42,10 @@ const AddShippingAddress = () => {
         pinCode: ""
     });
 
+    /**
+     * to update the form fields with local state data
+     * @param event
+     */
     const updateInput = (event: React.ChangeEvent<HTMLInputElement>) => {
         setAddress({
             ...address,
@@ -48,12 +53,46 @@ const AddShippingAddress = () => {
         })
     };
 
+    /**
+     * update the form with redux state
+     */
+    useEffect(() => {
+        if (reduxAddress && Object.keys(reduxAddress).length > 0) {
+            setAddress({
+                mobile: reduxAddress.mobile ? reduxAddress.mobile : "",
+                flat: reduxAddress.flat ? reduxAddress.flat : "",
+                landmark: reduxAddress.landmark ? reduxAddress.landmark : "",
+                street: reduxAddress.street ? reduxAddress.street : "",
+                city: reduxAddress.city ? reduxAddress.city : "",
+                state: reduxAddress.state ? reduxAddress.state : "",
+                country: reduxAddress.country ? reduxAddress.country : "",
+                pinCode: reduxAddress.pinCode ? reduxAddress.pinCode : "",
+            })
+        }
+    }, [reduxAddress])
+
+    /**
+     * to get address from server
+     */
+    useEffect(() => {
+        if (addressId) {
+            dispatch(userActions.getAddressAction());
+        }
+    }, [addressId])
+
+    /**
+     * handle the form submit
+     * @param event
+     */
     const handleSubmit = (event: any) => {
         event.preventDefault();
         const form = event.currentTarget;
         if (form.checkValidity() === true) {
-            if (address && Object.keys(address).length > 0) {
-                dispatch(userActions.createNewAddressAction(address)).then((response: any) => {
+            if (addressId && addressId.length > 0 && address && Object.keys(address).length > 0) {
+                dispatch(userActions.updateAddressAction({
+                    address: address,
+                    addressId: addressId
+                })).then((response: any) => {
                     if (!response.error) {
                         navigate("/users/profile");
                     }
@@ -71,7 +110,7 @@ const AddShippingAddress = () => {
         <>
             {loading && <SpinnerUI/>}
             <MainNavBar/>
-            <LayoutHeading heading={'Add Shipping Address'} color={'text-success'}/>
+            <LayoutHeading heading={'Edit Shipping Address'} color={'text-primary'}/>
             <Container>
                 <Row>
                     <Col xs={4}>
@@ -141,8 +180,8 @@ const AddShippingAddress = () => {
                                     type={'text'} placeholder={'PinCode'}></Form.Control>
                             </Form.Group>
                             <Form.Group className="mb-2">
-                                <Button variant="success" type="submit">
-                                    Add
+                                <Button variant="primary" type="submit">
+                                    Update
                                 </Button>
                                 <Link to={'/users/profile'} className="btn btn-dark ms-2">Cancel</Link>
                             </Form.Group>
@@ -153,4 +192,4 @@ const AddShippingAddress = () => {
         </>
     );
 };
-export default AddShippingAddress;
+export default EditShippingAddress;
